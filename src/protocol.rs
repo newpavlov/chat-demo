@@ -25,18 +25,6 @@ pub enum ClientMsg {
     },
 }
 
-impl ClientMsg {
-    /// Read client message from IO reader
-    pub fn read(r: impl io::Read) -> io::Result<Self> {
-        read_msg(r)
-    }
-
-    /// Write client message to IO writer
-    pub fn write(&self, w: impl io::Write) -> io::Result<()> {
-        write_msg(w, self)
-    }
-}
-
 /// Message types sent by server
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ServerMsg {

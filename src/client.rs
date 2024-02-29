@@ -129,7 +129,7 @@ impl Client {
         if magic != SERVER_MAGIC {
             return Err(ClientError::BadMagic { magic });
         }
-        log::info!("Successful handhake. Server protocol version: {ver_major}.{ver_minor}");
+        log::info!("Successful handshake. Server protocol version: {ver_major}.{ver_minor}");
         Ok(())
     }
 
