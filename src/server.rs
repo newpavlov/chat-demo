@@ -23,6 +23,7 @@ struct ClientConn {
     read_conn: TcpStream,
     write_conns: WriteConns,
     username: Option<String>,
+    disconnected: bool,
 }
 
 impl ClientConn {
@@ -49,6 +50,7 @@ impl ClientConn {
             read_conn,
             write_conns,
             username: None,
+            disconnected: false,
         };
         conn.handshake()?;
         conn.main_loop()
@@ -126,7 +128,7 @@ impl ClientConn {
         Ok(())
     }
 
-    fn disconnect(&self) -> Result<(), ClientConnError> {
+    fn disconnect(&mut self) -> Result<(), ClientConnError> {
         let write_conns = self.write_conns.read().unwrap();
         for (&conn_idx, conn_mutex) in write_conns.iter() {
             if conn_idx == self.conn_idx {
@@ -142,6 +144,7 @@ impl ClientConn {
                 },
             )?;
         }
+        self.disconnected = true;
         Ok(())
     }
 
@@ -189,6 +192,12 @@ impl Drop for ClientConn {
             .unwrap()
             .remove(&self.conn_idx)
             .unwrap();
+        if !self.disconnected {
+            let res = self.disconnect();
+            if let Err(err) = res {
+                log::warn!("Failed to disconnect client on drop: {err}")
+            }
+        }
     }
 }
 
